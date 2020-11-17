@@ -58,14 +58,24 @@ func main() {
 
     defer connection.Close()
 
-    channel, _ := connection.Channel()
+    channel, err := connection.Channel()
 
-    channel.Publish(exchange, routingKey, false, false, amqp.Publishing{
+    if err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+    }
+
+    err = channel.Publish(exchange, routingKey, false, false, amqp.Publishing{
         Headers: amqp.Table{},
         ContentType: "text/plain",
-        ContentEncoding: "",
         Body: []byte(body),
-        DeliveryMode: amqp.Transient,
-        Priority: 0,
+        DeliveryMode: amqp.Persistent,
     })
+
+    if err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+    }
+
+    fmt.Println("Publish successful")
 }
